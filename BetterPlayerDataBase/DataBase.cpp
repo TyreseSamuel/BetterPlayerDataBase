@@ -1,68 +1,218 @@
 #include "pch.h"
 #include "DataBase.h"
-#include "Player.h"
-#include <string>
-#include <fstream>
 #include <iostream>
+#include <fstream>
+#include <string>
 
-using namespace std;
-
-int main()
+DataBase::DataBase()
 {
-	DataBase playerList;
+	_arrayLength = 0;
+}
 
-	char input;
-	playerList.load();
+DataBase::~DataBase()
+{
 
-	while (1)
+}
+
+void DataBase::Add(Player newProfile)
+{
+	Player* newList = new Player[_arrayLength + 1];
+
+	for (int i = 0; i < _arrayLength; i++)
 	{
-		int choice;
-		cout << "\n\n=============== PLAYER MODIFY MENU V3 ===================";
-		cout << "\n1: Create a player profile.";
-		cout << "\n2: show all player profiles created.";
-		cout << "\n3: Search for a player profile.";
-		cout << "\n4: Save and load the player profiles.";
-		cout << "\n5: Exit from program.";
+		newList[i] = PlayerProfileList[i];
+	}
 
-		cout << "\n\nEnter your choice...!\n";
-		cin >> choice;
-		system("cls");//clearing the console
+	newList[_arrayLength] = newProfile;
 
-		switch (choice)
+	_arrayLength++;
+
+	PlayerProfileList = newList;
+	Sort();
+}
+
+
+void DataBase::Sort()
+{
+	bool sorted = false;
+
+	while (!sorted)
+	{
+		int swaps = 0;
+		for (int i = 0; i < _arrayLength - 1; i++)
 		{
-		case 1: //Create a player profile.
+			int p = i + 1;
 
-			cout << "\nGive the player profile a name..." << endl;
-			char cName[30];
-			cin >> cName;
-			cout << "\nGive the player profile a score..." << endl;
-			int cScore;
-			cin >> cScore;
-			playerList.Add(Player(cName, cScore));
-			break;
-		case 2: //show all player profiles created.
+			for (int n = 0; n < 30; n++)
+			{
+				if (PlayerProfileList[i].getName()[n] > PlayerProfileList[p].getName()[n])
+				{
+					Player tempPlayer = PlayerProfileList[p];
+					PlayerProfileList[p] = PlayerProfileList[i];
+					PlayerProfileList[i] = tempPlayer;
+					swaps++;
+					break;
+				}
+				else if (PlayerProfileList[i].getName()[n] == PlayerProfileList[p].getName()[n])
+				{
 
-			playerList.List();
-			system("pause");
-			break;
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
 
-		case 3: //Search for a player profile.
+		if (swaps <= 0)
+		{
+			sorted = true;
+		}
+	} 
+}
+void DataBase::List()
+{
+	system("cls");
+	for (int i = 0; i < _arrayLength; i++)
+	{
+		std::cout << PlayerProfileList[i].getName() << ": " << PlayerProfileList[i].getScore() << std::endl;
+	}
 
-			playerList.Search();
+	if (_arrayLength <= 0)
+	{
+		std::cout << "\nNo profiles found. " << std::endl;
+	}
+}
+void DataBase::Search()
+{
+	char input[30] = "\0";
+	int inputint = 0;
+	int index = 0;
 
-		case 4: //Save the player profiles.
+	std::cout << "Enter the name of the player to search for." << std::endl;
 
-			playerList.SavePlayerProfiles();
-			playerList.load();
-			break;
+	std::cin.clear();
+	std::cin.ignore(std::cin.rdbuf()->in_avail());
 
-		case 5: //Exit from program.
+	std::cin >> input;
+	index = BinarySearch(input);
+	if (index != -1) {
 
-			exit(0);
-		}//end of switch
+		std::cout << PlayerProfileList[index]._Name << PlayerProfileList[index]._Score << std::endl;
+
+		std::cout << "Do you want to edit this profile (yes/no)" << std::endl;
+		std::cin.clear();
+		std::cin >> input;
+		if (strcmp(input, "yes") == 0)
+		{
+			std::cout << "Choose a new name for this profile " << std::endl;
+			std::cout << "New name:" << std::endl;;
+			std::cin >> input;
+			PlayerProfileList[index].setName(input);
+			std::cout << "Choose a new score For this profile" << std::endl;
+			std::cout << "New score:";
+			std::cin >> inputint;
+			PlayerProfileList[index].setScore(inputint);
+			return;
+		}
+		else if (strcmp(input, "no") == 0)
+		{
+			return;
+		}
+		else
+		{
+			system("CLS");
+			std::cout << "Invalid input" << std::endl;
+		}
+	}
+	else
+	{
+		system("CLS");
+		std::cout << "Player not found." << std::endl;
+	}
+}
+Player DataBase::getPlayer(int i)
+{
+	return PlayerProfileList[i];
+}
+
+int DataBase::getLength()
+{
+	return _arrayLength;
+}
+
+void DataBase::SavePlayerProfiles()
+{
+	std::ofstream file;
+	file.open("PlayersRecord.dat", std::ios::out);
+
+	file << _arrayLength << std::endl;
+
+	for (int i = 0; i < _arrayLength; i++)
+	{
+		file << PlayerProfileList[i].getName() << std::endl;
+		file << PlayerProfileList[i].getScore() << std::endl;
+	}
+	file.flush();
+	file.close();
+
+}
+bool DataBase::load()
+{
+
+	char* name = new char[30];
+	int tempScore;
+	int tempArrayLength;
+
+	std::ifstream file;
+
+	file.open("PlayersRecord.dat", std::ios::in);
+
+	if (!file.is_open())
+		return false;
+
+	file >> tempArrayLength;
+
+	for (int i = 0; i < tempArrayLength; i++)
+	{
+		file >> name;
+		file >> tempScore;
+
+		Player newProfile(name, tempScore);
+		Add(newProfile);
+	}
+
+	if (file.rdstate())
+		return false;
+
+	return true;
+}
 
 
 
-	}//end of the while loop
 
-}//end of main
+int DataBase::BinarySearch(char  name[30])
+{
+	int max = _arrayLength - 1;
+	int min = 0;
+
+
+	while (min != max)
+	{
+		int middle = (min + max) / 2;
+		if (strcmp(PlayerProfileList[middle].getName(), name) == 0)
+		{
+			return middle;
+		}
+		else if (strcmp(PlayerProfileList[middle].getName(), name) < 0)
+		{
+			min = middle + 1;
+
+		}
+		else if (strcmp(PlayerProfileList[middle].getName(), name) > 0)
+		{
+			max = middle - 1;
+		}
+	}
+	return -1;
+}

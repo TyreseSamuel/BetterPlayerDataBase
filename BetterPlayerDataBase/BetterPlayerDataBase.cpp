@@ -20,20 +20,20 @@ int main()
 	while (1)
 	{
 		int choice;
-		cout << "\n\n=============== PLAYER MODIFY MENU V3 ===================";
-		cout << "\n1: Create a player profile.";
-		cout << "\n2: show all player profiles created.";
-		cout << "\n3: Search for a player profile.";
-		cout << "\n4: Save and load the player profiles.";
-		cout << "\n5: Exit from program.";
+		cout << "\n\nPlayer Dev Menu";
+		cout << "\n1: Make a profile";
+		cout << "\n2: List all profiles";
+		cout << "\n3: Search for existing profile";
+		cout << "\n4: Save + load profiles";
+		cout << "\n5: Quit";
 
-		cout << "\n\nEnter your choice...!\n";
+		cout << "\n\nChoose Wisely (lol just kidding do whatever)\n";
 		cin >> choice;
-		system("cls");//clearing the console
+		system("cls");
 
 		switch (choice)
 		{
-		case 1: //Create a player profile.
+		case 1:
 
 			cout << "\nGive the player profile a name..." << endl;
 			char cName[30];
@@ -43,32 +43,28 @@ int main()
 			cin >> cScore;
 			playerList.Add(Player(cName, cScore));
 			break;
-		case 2: //show all player profiles created.
+		case 2:
 
 			playerList.List();
 			system("pause");
 			break;
 
-		case 3: //Search for a player profile.
+		case 3:
 
 			playerList.Search();
 
-		case 4: //Save the player profiles.
+		case 4:
 
 			playerList.SavePlayerProfiles();
 			playerList.load();
 			break;
 
-		case 5: //Exit from program.
+		case 5:
 
 			exit(0);
-		}//end of switch
-
-
-
-	}//end of the while loop
-
-}//end of main
+		}
+	}
+}
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
 // Debug program: F5 or Debug > Start Debugging menu
